@@ -10,6 +10,8 @@ function getEmbedUrl(driveUrl: string) {
   return driveUrl
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function WatchPage({
   params,
 }: {
