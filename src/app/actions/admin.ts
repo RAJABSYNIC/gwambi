@@ -69,3 +69,41 @@ export async function deleteVideoAction(id: string) {
     return { success: false, error: err.message || 'Kuna tatizo.' }
   }
 }
+
+export async function editVideoAction(id: string, data: {
+  title: string
+  description: string
+  category: string
+  driveUrl: string
+  thumbnailUrl?: string
+}) {
+  try {
+    const cookieStore = await cookies()
+    if (cookieStore.get('admin_pin')?.value !== 'verified') {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    const updates: any = {
+      title: data.title,
+      description: data.description,
+      category: data.category,
+      drive_url: data.driveUrl,
+    }
+    
+    if (data.thumbnailUrl) {
+      updates.thumbnail_url = data.thumbnailUrl
+    }
+
+    const { data: video, error } = await supabaseAdmin
+      .from('videos')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) return { success: false, error: error.message }
+    return { success: true, data: JSON.parse(JSON.stringify(video)) }
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Kuna tatizo.' }
+  }
+}

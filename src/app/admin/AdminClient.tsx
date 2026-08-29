@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Trash2, Edit, Plus, Loader2 } from 'lucide-react'
-import { addVideoAction, deleteVideoAction } from '../actions/admin'
+import { addVideoAction, deleteVideoAction, editVideoAction } from '../actions/admin'
 
 interface Video {
   id: string
@@ -27,12 +27,13 @@ export default function AdminClient({ initialVideos, userId }: { initialVideos: 
   const [category, setCategory] = useState('')
   const [driveUrl, setDriveUrl] = useState('')
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
+  const [editId, setEditId] = useState<string | null>(null)
 
   const router = useRouter()
 
-  const handleAddVideo = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!thumbnailFile) {
+    if (!editId && !thumbnailFile) {
       setError('Tafadhali weka picha ya video (thumbnail).')
       return
     }
@@ -41,55 +42,90 @@ export default function AdminClient({ initialVideos, userId }: { initialVideos: 
     setError(null)
 
     try {
-      // 1. Upload thumbnail to ImgBB
-      const formData = new FormData()
-      formData.append('image', thumbnailFile)
-      
-      const uploadRes = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      })
-      
-      const uploadData = await uploadRes.json()
-      
-      if (!uploadRes.ok) {
-        throw new Error(uploadData.error || 'Imeshindwa kupakia picha.')
+      let thumbnailUrl = undefined
+
+      if (thumbnailFile) {
+        // 1. Upload thumbnail to ImgBB
+        const formData = new FormData()
+        formData.append('image', thumbnailFile)
+        
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        })
+        
+        const uploadData = await uploadRes.json()
+        
+        if (!uploadRes.ok) {
+          throw new Error(uploadData.error || 'Imeshindwa kupakia picha.')
+        }
+
+        thumbnailUrl = uploadData.url
       }
 
-      const thumbnailUrl = uploadData.url
+      if (editId) {
+        // Edit existing video
+        const result = await editVideoAction(editId, {
+          title,
+          description,
+          category,
+          driveUrl,
+          thumbnailUrl
+        })
 
-      // 2. Insert into Supabase using Server Action
-      const result = await addVideoAction({
-        title,
-        description,
-        category,
-        driveUrl,
-        thumbnailUrl
-      })
+        if (!result.success) {
+          throw new Error(result.error || 'Imeshindwa kusasisha video kwenye database.')
+        }
 
-      if (!result.success) {
-        throw new Error(result.error || 'Imeshindwa kupakia video kwenye database.')
+        setVideos(videos.map(v => v.id === editId ? result.data : v))
+      } else {
+        // Add new video
+        const result = await addVideoAction({
+          title,
+          description,
+          category,
+          driveUrl,
+          thumbnailUrl: thumbnailUrl!
+        })
+
+        if (!result.success) {
+          throw new Error(result.error || 'Imeshindwa kupakia video kwenye database.')
+        }
+
+        setVideos([result.data, ...videos])
       }
-
-      // Refresh list
-      setVideos([result.data, ...videos])
       
       // Reset form
-      setTitle('')
-      setDescription('')
-      setCategory('')
-      setDriveUrl('')
-      setThumbnailFile(null)
-      
-      // Clear file input
-      const fileInput = document.getElementById('thumbnail') as HTMLInputElement
-      if (fileInput) fileInput.value = ''
+      handleCancelEdit()
 
     } catch (err: any) {
-      setError(err.message || 'Kuna tatizo wakati wa kuongeza video.')
+      setError(err.message || 'Kuna tatizo wakati wa kuhifadhi video.')
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleEditClick = (video: Video) => {
+    setEditId(video.id)
+    setTitle(video.title)
+    setDescription(video.description)
+    setCategory(video.category || '')
+    setDriveUrl(video.drive_url)
+    setThumbnailFile(null)
+    setError(null)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleCancelEdit = () => {
+    setEditId(null)
+    setTitle('')
+    setDescription('')
+    setCategory('')
+    setDriveUrl('')
+    setThumbnailFile(null)
+    setError(null)
+    const fileInput = document.getElementById('thumbnail') as HTMLInputElement
+    if (fileInput) fileInput.value = ''
   }
 
   const handleDelete = async (id: string) => {
@@ -123,11 +159,11 @@ export default function AdminClient({ initialVideos, userId }: { initialVideos: 
         <div className="lg:col-span-1">
           <div className="bg-[var(--card)] p-6 rounded-xl border border-[var(--border)] shadow-sm">
             <h2 className="text-xl font-semibold text-[var(--foreground)] mb-6 flex items-center gap-2">
-              <Plus className="w-5 h-5 text-[var(--primary)]" />
-              Ongeza Video Mpya
+              {editId ? <Edit className="w-5 h-5 text-[var(--accent)]" /> : <Plus className="w-5 h-5 text-[var(--primary)]" />}
+              {editId ? 'Sasisha Video' : 'Ongeza Video Mpya'}
             </h2>
 
-            <form onSubmit={handleAddVideo} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-[var(--foreground)] mb-1">Kichwa cha Video (Title)</label>
                 <input
@@ -177,11 +213,12 @@ export default function AdminClient({ initialVideos, userId }: { initialVideos: 
                 <input
                   type="file"
                   id="thumbnail"
-                  required
+                  required={!editId}
                   accept="image/*"
                   onChange={e => setThumbnailFile(e.target.files?.[0] || null)}
                   className="w-full text-sm text-[var(--foreground)] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[var(--primary)]/10 file:text-[var(--primary)] hover:file:bg-[var(--primary)]/20"
                 />
+                {editId && <p className="text-xs text-[var(--foreground)]/50 mt-1">Acha wazi kama hutaki kubadilisha picha.</p>}
               </div>
 
               {error && (
@@ -190,13 +227,25 @@ export default function AdminClient({ initialVideos, userId }: { initialVideos: 
                 </div>
               )}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex justify-center items-center gap-2 bg-[var(--primary)] text-white py-2 px-4 rounded-md font-medium hover:bg-[var(--primary)]/90 disabled:opacity-50 transition-colors"
-              >
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Pakia Video'}
-              </button>
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 flex justify-center items-center gap-2 bg-[var(--primary)] text-white py-2 px-4 rounded-md font-medium hover:bg-[var(--primary)]/90 disabled:opacity-50 transition-colors"
+                >
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (editId ? 'Sasisha Video' : 'Pakia Video')}
+                </button>
+                {editId && (
+                  <button
+                    type="button"
+                    onClick={handleCancelEdit}
+                    disabled={loading}
+                    className="flex-1 bg-[var(--background)] border border-[var(--border)] text-[var(--foreground)] py-2 px-4 rounded-md font-medium hover:bg-[var(--background)]/70 transition-colors"
+                  >
+                    Katisha
+                  </button>
+                )}
+              </div>
             </form>
           </div>
         </div>
@@ -232,6 +281,13 @@ export default function AdminClient({ initialVideos, userId }: { initialVideos: 
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => handleEditClick(video)}
+                        className="p-2 text-blue-400 hover:text-blue-500 hover:bg-blue-500/10 rounded-md transition-colors"
+                        title="Badilisha"
+                      >
+                        <Edit className="w-5 h-5" />
+                      </button>
                       <button 
                         onClick={() => handleDelete(video.id)}
                         className="p-2 text-red-400 hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors"
