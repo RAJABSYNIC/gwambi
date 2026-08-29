@@ -1,0 +1,16 @@
+{
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_SUPABASE_URL": "https://dxusofodazyzplgcujpr.supabase.co",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_bPaVA4jmflmKH6CTCm9poA_hggCM8IF",
+      "NEXT_PUBLIC_PRESSSO_PAY_KEY": "pk__gsYsXDZRH4m8_cx",
+      "NEXT_PUBLIC_IMGBB_API_KEY": "08b473777e710b5751391d5227cb869e"
+    }
+  },
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://dxusofodazyzplgcujpr.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_bPaVA4jmflmKH6CTCm9poA_hggCM8IF",
+    "NEXT_PUBLIC_PRESSSO_PAY_KEY": "pk__gsYsXDZRH4m8_cx",
+    "NEXT_PUBLIC_IMGBB_API_KEY": "08b473777e710b5751391d5227cb869e"
+  }
+}

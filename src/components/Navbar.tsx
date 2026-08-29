@@ -30,7 +30,7 @@ export function Navbar() {
     <nav className="border-b border-[var(--border)] bg-[var(--background)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
+          <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2 group">
               <div className="p-2 bg-[var(--primary)]/10 rounded-lg group-hover:bg-[var(--primary)]/20 transition-colors">
                 <Video className="w-6 h-6 text-[var(--primary)]" />
@@ -39,7 +39,18 @@ export function Navbar() {
                 Ngwambi
               </span>
             </Link>
+            
+            {/* Main Navigation Links */}
+            <div className="hidden md:flex items-center gap-6">
+              <Link href="/" className="text-sm font-medium text-[var(--foreground)]/70 hover:text-[var(--primary)] transition-colors">
+                Home
+              </Link>
+              <Link href={user ? "/account" : "/login"} className="text-sm font-medium text-[var(--foreground)]/70 hover:text-[var(--primary)] transition-colors">
+                Account
+              </Link>
+            </div>
           </div>
+
           <div className="flex items-center gap-4">
             {user ? (
               <button
