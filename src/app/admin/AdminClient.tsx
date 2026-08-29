@@ -59,7 +59,7 @@ export default function AdminClient({ initialVideos, userId }: { initialVideos: 
       const thumbnailUrl = uploadData.url
 
       // 2. Insert into Supabase using Server Action
-      const data = await addVideoAction({
+      const result = await addVideoAction({
         title,
         description,
         category,
@@ -67,8 +67,12 @@ export default function AdminClient({ initialVideos, userId }: { initialVideos: 
         thumbnailUrl
       })
 
+      if (!result.success) {
+        throw new Error(result.error || 'Imeshindwa kupakia video kwenye database.')
+      }
+
       // Refresh list
-      setVideos([data, ...videos])
+      setVideos([result.data, ...videos])
       
       // Reset form
       setTitle('')
@@ -92,7 +96,11 @@ export default function AdminClient({ initialVideos, userId }: { initialVideos: 
     if (!confirm('Una uhakika unataka kufuta video hii?')) return
 
     try {
-      await deleteVideoAction(id)
+      const result = await deleteVideoAction(id)
+      if (!result.success) {
+        alert(result.error || 'Imeshindwa kufuta video.')
+        return
+      }
       
       setVideos(videos.filter(v => v.id !== id))
     } catch (err: any) {
