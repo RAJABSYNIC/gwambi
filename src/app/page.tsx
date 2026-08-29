@@ -14,10 +14,12 @@ export default async function Home() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[var(--foreground)]">Video Mpya</h1>
-        <p className="text-[var(--foreground)]/70 mt-2">
-          Tazama video mbalimbali hapa Ngwambi.
+      <div className="mb-10 text-center sm:text-left">
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] drop-shadow-sm">
+          Video Mpya
+        </h1>
+        <p className="text-[var(--foreground)]/70 mt-3 text-lg">
+          Tazama video kali na mpya hapa Ngwambi.
         </p>
       </div>
 

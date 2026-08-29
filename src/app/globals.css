@@ -13,14 +13,14 @@
 }
 
 :root {
-  /* Default to dark mode (Navy/Slate) */
-  --background: #0f172a; /* slate-900 */
+  /* Premium Dark Navy/Slate */
+  --background: #090e17; /* Very deep navy/slate */
   --foreground: #f8fafc; /* slate-50 */
-  --primary: #06b6d4; /* cyan-500 */
-  --accent: #a855f7; /* purple-500 */
-  --card: #1e293b; /* slate-800 */
+  --primary: #00d2ff; /* Bright Cyan */
+  --accent: #b026ff; /* Vibrant Purple */
+  --card: rgba(30, 41, 59, 0.4); /* slate-800 with opacity for glassmorphism */
   --card-foreground: #f1f5f9; /* slate-100 */
-  --border: #334155; /* slate-700 */
+  --border: rgba(255, 255, 255, 0.08); /* Subtle white border */
 }
 
 body {
@@ -29,4 +29,47 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(0, 210, 255, 0.08), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(176, 38, 255, 0.08), transparent 25%);
+  background-attachment: fixed;
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: var(--card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Shine animation for cards */
+@keyframes shine {
+  from { background-position: 200% center; }
+  to { background-position: -200% center; }
+}
+.hover-shine:hover {
+  background: linear-gradient(
+    120deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.05) 30%,
+    transparent 40%
+  );
+  background-size: 200% auto;
+  animation: shine 1.5s linear infinite;
 }
