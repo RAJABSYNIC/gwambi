@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+import { SignOutButton } from '@/components/SignOutButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,6 +54,10 @@ export default async function AccountPage() {
                   })}
                 </div>
               </div>
+            </div>
+            
+            <div className="mt-8 pt-6 border-t border-[var(--border)]">
+              <SignOutButton />
             </div>
           </div>
         </div>
