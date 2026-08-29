@@ -47,5 +47,17 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Handle Anonymous Session (Guest ID)
+  if (!request.cookies.has('guest_id')) {
+    const guestId = crypto.randomUUID()
+    supabaseResponse.cookies.set('guest_id', guestId, {
+      path: '/',
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 365 * 10 // 10 years
+    })
+  }
+
   return supabaseResponse
 }
