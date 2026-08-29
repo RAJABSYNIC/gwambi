@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Trash2, Edit, Plus, Loader2 } from 'lucide-react'
+import { addVideoAction, deleteVideoAction } from '../actions/admin'
 
 interface Video {
   id: string
@@ -28,7 +28,6 @@ export default function AdminClient({ initialVideos, userId }: { initialVideos: 
   const [driveUrl, setDriveUrl] = useState('')
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
 
-  const supabase = createClient()
   const router = useRouter()
 
   const handleAddVideo = async (e: React.FormEvent) => {
@@ -59,21 +58,14 @@ export default function AdminClient({ initialVideos, userId }: { initialVideos: 
 
       const thumbnailUrl = uploadData.url
 
-      // 2. Insert into Supabase
-      const { data, error: insertError } = await supabase
-        .from('videos')
-        .insert({
-          title,
-          description,
-          category,
-          drive_url: driveUrl,
-          thumbnail_url: thumbnailUrl,
-          created_by: userId
-        })
-        .select()
-        .single()
-
-      if (insertError) throw insertError
+      // 2. Insert into Supabase using Server Action
+      const data = await addVideoAction({
+        title,
+        description,
+        category,
+        driveUrl,
+        thumbnailUrl
+      })
 
       // Refresh list
       setVideos([data, ...videos])
@@ -100,8 +92,7 @@ export default function AdminClient({ initialVideos, userId }: { initialVideos: 
     if (!confirm('Una uhakika unataka kufuta video hii?')) return
 
     try {
-      const { error } = await supabase.from('videos').delete().eq('id', id)
-      if (error) throw error
+      await deleteVideoAction(id)
       
       setVideos(videos.filter(v => v.id !== id))
     } catch (err: any) {
