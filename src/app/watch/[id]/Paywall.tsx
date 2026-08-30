@@ -70,7 +70,7 @@ export default function Paywall({ videoId, guestId, price }: { videoId: string, 
   }, [polling, orderId, guestId])
 
   return (
-    <div className="absolute inset-0 w-full h-full bg-black/90 flex flex-col items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 w-full h-full bg-[var(--background)] flex flex-col items-center justify-center z-[100] p-4">
       <div className="bg-[var(--card)] p-8 rounded-2xl max-w-md w-full border border-[var(--border)] shadow-2xl relative overflow-hidden">
         {/* Glow effect */}
         <div className="absolute -top-10 -right-10 w-32 h-32 bg-[var(--primary)] rounded-full blur-[80px] opacity-20 pointer-events-none"></div>
@@ -126,6 +126,13 @@ export default function Paywall({ videoId, guestId, price }: { videoId: string, 
             </p>
           </div>
         )}
+
+        {/* Go Back Link */}
+        <div className="relative z-10 mt-6 text-center">
+          <a href="/" className="text-sm text-[var(--foreground)]/50 hover:text-[var(--primary)] transition-colors">
+            ← Rudi Kwenye Video
+          </a>
+        </div>
       </div>
     </div>
   )

@@ -16,7 +16,16 @@ interface Video {
   created_at: string
 }
 
-export default function AdminClient({ initialVideos, userId }: { initialVideos: Video[], userId: string }) {
+export interface IncomeStats {
+  today: number
+  yesterday: number
+  last7Days: number
+  lastMonth: number
+  lastYear: number
+  lifetime: number
+}
+
+export default function AdminClient({ initialVideos, userId, stats }: { initialVideos: Video[], userId: string, stats: IncomeStats }) {
   const [videos, setVideos] = useState<Video[]>(initialVideos)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -151,6 +160,23 @@ export default function AdminClient({ initialVideos, userId }: { initialVideos: 
           <h1 className="text-3xl font-bold text-[var(--foreground)]">Admin Panel</h1>
           <p className="text-[var(--foreground)]/70 mt-1">Ongeza na kudhibiti video zote hapa.</p>
         </div>
+      </div>
+
+      {/* Income Stats Dashboard */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        {[
+          { label: 'Leo', value: stats.today },
+          { label: 'Jana', value: stats.yesterday },
+          { label: 'Siku 7 zilizopita', value: stats.last7Days },
+          { label: 'Mwezi 1 uliopita', value: stats.lastMonth },
+          { label: 'Mwaka 1 uliopita', value: stats.lastYear },
+          { label: 'Jumla (Lifetime)', value: stats.lifetime },
+        ].map((stat, i) => (
+          <div key={i} className="bg-[var(--card)] p-4 rounded-xl border border-[var(--border)] shadow-sm flex flex-col justify-center items-center text-center">
+            <p className="text-xs font-medium text-[var(--foreground)]/60 mb-1 uppercase tracking-wider">{stat.label}</p>
+            <p className="text-lg font-bold text-[var(--primary)]">TZS {stat.value.toLocaleString()}</p>
+          </div>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
