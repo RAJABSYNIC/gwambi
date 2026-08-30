@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-// We need the service role key to update the database since this is a server-to-server webhook
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey)
-
 export async function POST(req: Request) {
   try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey)
+
     const payload = await req.json()
     // Assume Pressso Pay sends { transactionId: '...', status: 'completed' | 'failed', reference: 'our-order-id' }
     
